@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 
 from pathlib import Path
-from django.conf.global_settings import SECRET_KEY
 from dotenv import load_dotenv
 
 # Quick-start development settings - unsuitable for production
@@ -25,7 +24,7 @@ ADMINS = (
     ('img', 'img@it-solution.ru'),
 )
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 PROJECT_PATH = os.path.dirname(__file__).replace('\\','/')
 
@@ -141,7 +140,7 @@ STATICFILES_DIRS = [
 ]
 
 
-from integration_utils.its_utils.mute_logger import MuteLogger
+from integration_utils.iu_logger.classes.mute_logger import MuteLogger
 ilogger = MuteLogger()
 
 # local settings
