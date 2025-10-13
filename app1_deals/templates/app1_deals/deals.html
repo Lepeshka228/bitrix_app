@@ -6,11 +6,32 @@
 </head>
 <body>
     <div>
-        <nav><a href="{% url 'deals:reload_index' %}">На главную</a></nav>
+        <nav>
+            <a href="{% url 'deals:reload_index' %}">На главную</a>
+            <button href="">Создать сделку</button>
+        </nav>
         <hr>
     </div>
     <div>
-    {{ deals }}
+        <h2>Список 10 последних активных сделок</h2>
+        <table border="1" cellspacing="0" cellpadding="5">
+            <thead>
+            <tr>
+                {% for field in fields %}
+                    <th>{{ field }}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for deal in res %}
+                <tr>
+                    {% for field in deal.values %}
+                        <td>{{ field }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
 </body>
 </html>
