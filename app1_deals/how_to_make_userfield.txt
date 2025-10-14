@@ -1,0 +1,23 @@
+cas_field = but.call_api_method('crm.deal.userfield.add', {
+    'USER_TYPE_ID': 'enumeration',
+    'FIELD_NAME': 'UF_CRM_PRIORITY',
+    'LABEL': 'Приоритет',
+    'EDIT_FORM_LABEL': 'Приоритет',
+    'LIST_COLUMN_LABEL': 'Приоритет',
+    'LIST_FILTER_LABEL': 'Приоритет',
+    'XML_ID': "DEAL_PRIORITY",
+    'LIST': [
+        {"VALUE": "Низкий", "SORT": 1},
+        {"VALUE": "Средний", "SORT": 2, "DEF": "Y"},
+        {"VALUE": "Высокий", "SORT": 3},
+        {"VALUE": "Наивысший", "SORT": 4}
+    ]
+})
+
+print(cas_field)
+
+==================================================================
+
+output:
+
+{'result': 233, 'time': {'start': 1760441693, 'finish': 1760441693.417193, 'duration': 0.4171929359436035, 'processing': 0, 'date_start': '2025-10-14T14:34:53+03:00', 'date_finish': '2025-10-14T14:34:53+03:00', 'operating_reset_at': 1760442293, 'operating': 0.34000492095947266}}

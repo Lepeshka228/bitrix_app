@@ -8,7 +8,7 @@
     <div>
         <nav>
             <a href="{% url 'deals:reload_index' %}">На главную</a>
-            <button href="">Создать сделку</button>
+            <button onclick='document.location="{% url "deals:add_deal" %}"'>Создать сделку</button>
         </nav>
         <hr>
     </div>
@@ -16,20 +16,20 @@
         <h2>Список 10 последних активных сделок</h2>
         <table border="1" cellspacing="0" cellpadding="5">
             <thead>
-            <tr>
-                {% for field in fields %}
-                    <th>{{ field }}</th>
-                {% endfor %}
-            </tr>
-            </thead>
-            <tbody>
-            {% for deal in res %}
                 <tr>
-                    {% for field in deal.values %}
-                        <td>{{ field }}</td>
+                    {% for field in fields %}
+                        <th>{{ field }}</th>
                     {% endfor %}
                 </tr>
-            {% endfor %}
+            </thead>
+            <tbody>
+                {% for deal in res %}
+                    <tr>
+                        {% for val in deal.values %}
+                            <td>{{ val }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>

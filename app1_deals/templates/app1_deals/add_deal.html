@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h2>Добавить новую сделку</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        <table border="1" cellspacing="0" cellpadding="5">
+            {{ form.as_table }}
+        </table>
+        <button type="submit">Создать сделку</button>
+    </form>
+    <style>
+        th, td {
+            padding: 8px 10px;
+            text-align: left;
+            vertical-align: middle;
+            border: 1px solid #ccc;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 6px 8px;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+        }
+    </style>
+
+
+    <p><a href="{% url 'deals:deals' %}">Назад</a></p>
+
+</body>
+</html>
