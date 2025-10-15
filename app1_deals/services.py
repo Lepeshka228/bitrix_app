@@ -64,7 +64,6 @@ def renaming_choices(res, type_choices, stage_choices, currency_choices, priorit
 def fill_and_create_deal_form(but, form, choices):
     '''
     Заполняет форму пользовательскими данными и создаёт её через api битрикса
-    Перенаправляет на redirect_url
     '''
 
     # назначаю варианты
