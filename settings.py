@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'integration_utils.its_utils.app_gitpull',
 
     'main',
-    'app1_deals'
+    'app1_deals',
+    'app2_goods'
 ]
 
 ROOT_URLCONF = 'urls'
