@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ good.NAME }}</title>
+</head>
+<body>
+<h1>{{ good.NAME }}</h1>
+  <p>ID: {{ good.ID }}</p>
+  {% if good.PRICE %}<p>Цена: {{ good.PRICE }}</p>{% endif %}
+  {% if good.DESCRIPTION %}<div>{{ good.DESCRIPTION|safe }}</div>{% endif %}
+</body>
+</html>

@@ -15,33 +15,55 @@
         <h3>Выберите товар</h3>
         <form method="post">
             {% csrf_token %}
-            <table border="1" cellspacing="0" cellpadding="5">
-                {{ form.as_table }}
-            </table>
-            <button type="submit">Действие по кнопке</button>
+
+            {{ form.good_name.label_tag }} <br>
+            {{ form.good_name }}
+            {{ form.good_id }} <!-- скрытое -->
+
+            <button type="submit">Сгенерировать QR-код</button>
         </form>
-            <style>
-                th, td {
-                    padding: 8px 10px;
-                    text-align: left;
-                    vertical-align: middle;
-                    border: 1px solid #ccc;
-                }
 
-                input, select, textarea {
-                    width: 100%;
-                    box-sizing: border-box;
-                    padding: 6px 8px;
-                    border: 1px solid #aaa;
-                    border-radius: 4px;
-                    font-size: 14px;
-                }
+        <!-- Блок для автокомплита -->
+        <div id="suggestions"></div>
 
-                button {
-                    margin-top: 15px;
-                    padding: 10px 20px;
-                }
-            </style>
+        <script>
+            const input = document.getElementById('good-input');
+            const hiddenId = document.getElementById('id_good_id'); // Django добавляет "id_" к имени поля
+            const suggestions = document.getElementById('suggestions');
+
+            input.addEventListener('input', async () => {
+              const q = input.value.trim();
+              if (!q) { suggestions.style.display='none'; return; }
+
+              const response = await fetch(`/goods/autocomplete/?q=${encodeURIComponent(q)}`);
+              const items = await response.json();
+
+              if (!items || items.length === 0) { suggestions.style.display='none'; return; }
+
+              suggestions.innerHTML = items.map(i => `<div data-id="${i.ID}">${i.NAME}</div>`).join('');
+              suggestions.style.display = 'block';
+
+              const rect = input.getBoundingClientRect();
+              suggestions.style.left = rect.left + 'px';
+              suggestions.style.top = (rect.bottom + window.scrollY) + 'px';
+              suggestions.style.width = rect.width + 'px';
+            });
+
+            suggestions.addEventListener('click', e => {
+              if (e.target.tagName === 'DIV') {
+                input.value = e.target.textContent;
+                hiddenId.value = e.target.dataset.id;
+                suggestions.style.display = 'none';
+              }
+            });
+
+            // Закрыть подсказки если клик вне
+            document.addEventListener('click', (e) => {
+              if (!suggestions.contains(e.target) && e.target !== input) {
+                suggestions.style.display = 'none';
+              }
+            });
+        </script>
 
 <!--        <h2>Ваши товары</h2>-->
 <!--        {% for good in goods_list_of_names %}-->

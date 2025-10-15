@@ -1,11 +1,10 @@
-import qrcode, base64
+import qrcode, base64, PIL
 from io import BytesIO
 
 def api_goods_info(but):
     """ Возвращает справочную информацию из api """
 
     result = {}
-
     # описание полей товара
     result['goods_fields'] = but.call_list_method("crm.product.fields")
     # список товаров

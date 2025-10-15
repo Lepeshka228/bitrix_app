@@ -1,39 +1,98 @@
 from appier.legacy import items
+from django.http import JsonResponse, HttpResponseNotFound
 from django.shortcuts import render
 
 from integration_utils.bitrix24.bitrix_user_auth.main_auth import main_auth
+from integration_utils.bitrix24.models import BitrixUser
+from django.core.signing import Signer, BadSignature
 
 from .forms import GoodForm
-from .services import api_goods_info
+from .services import api_goods_info, generate_qr_code
 
+
+signer = Signer()
 # Create your views here.
 @main_auth(on_cookies=True)
 def goods(request):
-    '''
+    """
     Страниуа с формой для генерации qr-кода - Выбор товара и генерация соответствующей
     ссылки на внешнюю страницу
-    '''
+    """
 
     form = GoodForm()
 
     but = request.bitrix_user_token
     result = api_goods_info(but)
-    # res = "Ваши товары здесь. Скоро вы их выберите и перейдёте по qr-коду на внешнюю страницу с этим товаром"
+    goods_list_info = result.get('goods_list', [])    # информация по каждому товару
 
-    goods_fields_info = result.get('goods_fields')
-    goods_list_info = result.get('goods_list')
-    goods_property_fields = result.get('goods_property_fields')
+    if request.method == 'POST':
+        form = GoodForm(request.POST)
+        if form.is_valid():
+            good_id = form.cleaned_data['good_id']
+            # подписываю ID
+            signed_id = signer.sign(good_id)
+            # по ней делаю ссылку
+            public_url = request.build_absolute_uri(f"/goods/public/{signed_id}/")
+            # генерирую qr
+            qr_data = generate_qr_code(public_url)
 
-    goods_list_of_names = []
-    for good_info in goods_list_info:
-        goods_list_of_names.append(good_info.get('NAME'))
+            return render(request, 'app2_goods/goods_qr.html', {
+                'qr_data': qr_data,
+                'public_url': public_url,
+                'good_id': good_id
+            })
 
-    print(goods_list_of_names)
-    print(goods_list_info)
-    print('goods_property_fields')
-    print(goods_property_fields)
+    return render(request, 'app2_goods/goods.html', {
+        'form': form,
+        'goods_list_info': goods_list_info
+    })
 
-    return render(request, 'app2_goods/goods.html', locals())
+
+@main_auth(on_cookies=True)
+def goods_autocomplete(request):
+    """ Возвращает json списка совпадений по подстроке q """
+
+    query = request.GET.get('q', '').lower()
+    but = request.bitrix_user_token
+    result = api_goods_info(but)
+    goods_list_info = result.get('goods_list', [])
+
+    # ищу совпадения
+    matches = [
+        {'ID': g.get('ID'), 'NAME': g.get('NAME')}
+        for g in goods_list_info
+        if query in g.get('NAME', '').lower()
+    ]
+
+    return JsonResponse(matches, safe=False)
+
+
+def goods_public(request, signed_id):
+    """ Публичная страница товара по секретной ссылке """
+
+    try:
+        good_id = signer.unsign(signed_id)
+    except BadSignature:
+        return HttpResponseNotFound("Неверная ссылка")
+
+    # получаю данные о товаре через BitrixUser
+    btx_user = BitrixUser.objects.first()   # первого юзера из БД с доступом к приложению (api) вне iframe
+    if not btx_user:
+        return HttpResponseNotFound("Нет Bitrix-пользователя для запроса данных")
+
+    # достаю токен
+    but = btx_user.bitrix_user_token
+    if not but:
+        return HttpResponseNotFound("Нет токена Bitrix для этого пользователя")
+
+    # запрашиваю товар
+    resp = but.call_api_method('crm.product.get', {'id': good_id})
+    good = resp.get('result')
+
+    if not good:
+        return HttpResponseNotFound("Товар не найден в Bitrix")
+
+    return render(request, 'app2_goods/goods_public.html', {'good': good})
 
 
 
