@@ -12,7 +12,51 @@
         <hr>
     </div>
     <div>
-        {{ res }}
+        <h3>Выберите товар</h3>
+        <form method="post">
+            {% csrf_token %}
+            <table border="1" cellspacing="0" cellpadding="5">
+                {{ form.as_table }}
+            </table>
+            <button type="submit">Действие по кнопке</button>
+        </form>
+            <style>
+                th, td {
+                    padding: 8px 10px;
+                    text-align: left;
+                    vertical-align: middle;
+                    border: 1px solid #ccc;
+                }
+
+                input, select, textarea {
+                    width: 100%;
+                    box-sizing: border-box;
+                    padding: 6px 8px;
+                    border: 1px solid #aaa;
+                    border-radius: 4px;
+                    font-size: 14px;
+                }
+
+                button {
+                    margin-top: 15px;
+                    padding: 10px 20px;
+                }
+            </style>
+
+<!--        <h2>Ваши товары</h2>-->
+<!--        {% for good in goods_list_of_names %}-->
+<!--            {{ good }} <br>-->
+<!--        {% endfor %}-->
+<!--        <hr>-->
+<!--        Инфа о полях: <br>-->
+<!--        {% for item, value in goods_fields_info.items %}-->
+<!--            {{ item }} - {{value}} <br>-->
+<!--        {% endfor %}-->
+<!--        <hr>-->
+<!--        Инфа о товарах-->
+<!--        {% for good_info in goods_list_info %}-->
+<!--            {{ good_info }} <br>-->
+<!--        {% endfor %}-->
     </div>
 </body>
 </html>
