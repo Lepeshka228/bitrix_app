@@ -23,7 +23,7 @@ def goods(request):
 
     but = request.bitrix_user_token
     result = api_goods_info(but)
-    goods_list_info = result.get('goods_list', [])    # информация по каждому товару
+    goods_list_info = result.get('goods_list')    # информация по каждому товару
 
     if request.method == 'POST':
         form = GoodForm(request.POST)
@@ -55,7 +55,7 @@ def goods_autocomplete(request):
     query = request.GET.get('q', '').lower()
     but = request.bitrix_user_token
     result = api_goods_info(but)
-    goods_list_info = result.get('goods_list', [])
+    goods_list_info = result.get('goods_list')
 
     # ищу совпадения
     matches = [
@@ -86,13 +86,19 @@ def goods_public(request, signed_id):
         return HttpResponseNotFound("Нет токена Bitrix для этого пользователя")
 
     # запрашиваю товар
-    resp = but.call_api_method('crm.product.get', {'id': good_id})
-    good = resp.get('result')
+    good = but.call_api_method('crm.product.get', {'id': good_id})['result']
+    # good_img = but.call_api_method('catalog.productImage.get', {'productId': good_id})
+    good_img_info = but.call_api_method('catalog.productImage.list', {'productId': good_id, 'select': ['detailUrl']})\
+                                    ['result']['productImages']
+    good_img = None
+    if good_img_info:
+        good_img = good_img_info[0].get('detailUrl')
 
     if not good:
         return HttpResponseNotFound("Товар не найден в Bitrix")
 
-    return render(request, 'app2_goods/goods_public.html', {'good': good})
+    return render(request, 'app2_goods/goods_public.html', {'good': good,
+                                                            'good_img': good_img})
 
 
 

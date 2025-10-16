@@ -6,8 +6,13 @@
 </head>
 <body>
 <h1>{{ good.NAME }}</h1>
+  {% if good_img %}
+  <img src="{{ good_img }}" width="300">
+  {% else %}
+  <p>Картинки нет</p>
+  {% endif %}
   <p>ID: {{ good.ID }}</p>
-  {% if good.PRICE %}<p>Цена: {{ good.PRICE }}</p>{% endif %}
+  {% if good.PRICE %}<p>Цена: {{ good.PRICE }} {% if good.CURRENCY_ID %} {{ good.CURRENCY_ID }} {% endif %}</p>{% endif %}
   {% if good.DESCRIPTION %}<div>{{ good.DESCRIPTION|safe }}</div>{% endif %}
 </body>
 </html>
