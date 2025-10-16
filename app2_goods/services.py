@@ -6,7 +6,7 @@ def api_goods_info(but):
 
     result = {}
     # описание полей товара
-    result['goods_fields'] = but.call_list_method("crm.product.fields")
+    # result['goods_fields'] = but.call_list_method("crm.product.fields")
     # список товаров
     result['goods_list'] = but.call_list_method("crm.product.list")
 

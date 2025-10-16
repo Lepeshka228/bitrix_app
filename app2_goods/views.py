@@ -1,3 +1,5 @@
+import secrets
+
 from appier.legacy import items
 from django.http import JsonResponse, HttpResponseNotFound
 from django.shortcuts import render
@@ -30,9 +32,10 @@ def goods(request):
         if form.is_valid():
             good_id = form.cleaned_data['good_id']
             # подписываю ID
-            signed_id = signer.sign(good_id)
+            random_token = secrets.token_urlsafe(16)
+            signed_data = signer.sign(f'{good_id}|{random_token}')
             # по ней делаю ссылку
-            public_url = request.build_absolute_uri(f"/goods/public/{signed_id}/")
+            public_url = request.build_absolute_uri(f"/goods/public/{signed_data}/")
             # генерирую qr
             qr_data = generate_qr_code(public_url)
 
@@ -67,14 +70,15 @@ def goods_autocomplete(request):
     return JsonResponse(matches, safe=False)
 
 
-def goods_public(request, signed_id):
+def goods_public(request, signed_data):
     """ Публичная страница товара по секретной ссылке """
 
     try:
-        good_id = signer.unsign(signed_id)
+        good_data = signer.unsign(signed_data)
     except BadSignature:
         return HttpResponseNotFound("Неверная ссылка")
-
+    parts = good_data.split("|")
+    good_id = parts[0]
     # получаю данные о товаре через BitrixUser
     btx_user = BitrixUser.objects.first()   # первого юзера из БД с доступом к приложению (api) вне iframe
     if not btx_user:
