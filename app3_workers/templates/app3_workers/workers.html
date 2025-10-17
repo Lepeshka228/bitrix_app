@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div>
+        <nav>
+            <a href="{% url 'workers:reload_index' %}">На главную</a>
+        </nav>
+        <hr>
+    </div>
+    <h2>Таблица сотрудников</h2>
+    <table border="1" cellspacing="0" cellpadding="5">
+        <thead>
+            <tr>
+                <th>Работник</th>
+                <th>Отделы</th>
+                <th>Начальники</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user_id, info in result.items %}
+            <tr>
+                <td>{{ info.NAME }} {{ info.LAST_NAME }}</td>
+                <td>
+                    {% if info.DEPARTMENTS %}
+                        {% for dep in info.DEPARTMENTS %}
+                            {{ dep }}<br>
+                        {% endfor %}
+                    {% else %}
+                        <em>нет данных</em>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if info.CHIEFS %}
+                        {% for chief in info.CHIEFS %}
+                            {{ chief }} <br>
+                        {% endfor %}
+                    {% else %}
+                        <em>—</em>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
