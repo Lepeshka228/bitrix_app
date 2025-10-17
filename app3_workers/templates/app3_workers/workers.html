@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+<!--    <script src="https://unpkg.com/@bitrix24/b24jssdk@latest/dist/umd/index.min.js"></script>-->
+    <script src="https://api.bitrix24.com/api/v1/"></script>
 </head>
 <body>
     <div>
@@ -23,7 +25,7 @@
         <tbody>
             {% for user_id, info in result.items %}
             <tr>
-                <td>{{ info.NAME }} {{ info.LAST_NAME }}</td>
+                <td><span class="user-link" data-id="{{ user_id }}">{{ info.NAME }} {{ info.LAST_NAME }}</span></td>
                 <td>
                     {% if info.DEPARTMENTS %}
                         {% for dep in info.DEPARTMENTS %}
@@ -46,5 +48,33 @@
             {% endfor %}
         </tbody>
     </table>
+    <style>
+        span.user-link {
+            cursor: pointer;
+        }
+        span.user-link:hover {
+            color: #005bb5;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Проверяем, доступен ли BX24
+            if (typeof BX24 === 'undefined') {
+                console.warn('BX24 API не найден — вы не в iframe Bitrix24.');
+                return;
+            }
+
+            document.querySelectorAll('.user-link').forEach(el => {
+                el.addEventListener('click', () => {
+                    const id = el.dataset.id;
+                    if (id) {
+                        BX24.openPath(`/company/personal/user/${id}/`);
+                    }
+                });
+            });
+        });
+    </script>
+
 </body>
 </html>

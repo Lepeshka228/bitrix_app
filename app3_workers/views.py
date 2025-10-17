@@ -5,7 +5,7 @@ from django.shortcuts import render
 
 from integration_utils.bitrix24.bitrix_user_auth.main_auth import main_auth
 
-from .services import api_workers_info, get_department_names, chief_froward_list
+from .services import api_workers_info, get_department_names, chief_forward_list
 
 
 # Create your views here.
@@ -27,7 +27,7 @@ def workers(request):
     for user in active_workers_list:
         user_id = int(user['ID'])
         department_names = get_department_names(departments_by_id, user)
-        chiefs = chief_froward_list(departments_by_id, users_by_id, user)
+        chiefs = chief_forward_list(departments_by_id, users_by_id, user)
         chief_names = [f"{c['NAME']} {c['LAST_NAME']}" for c in chiefs]
         result[user_id] = {'NAME': user.get('NAME'),
                            'LAST_NAME': user.get('LAST_NAME'),

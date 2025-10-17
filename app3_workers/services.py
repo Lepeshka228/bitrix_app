@@ -1,4 +1,5 @@
-from integration_utils.bitrix24.functions.call_list_method import call_list_method
+from integration_utils.bitrix24.functions import call_list_method, batch_api_call
+
 
 
 def api_workers_info(but):
@@ -6,13 +7,13 @@ def api_workers_info(but):
 
     result = {}
     #список полей для пользователя
-    result['workers_fields_info'] = but.call_list_method('user.fields')
+    # result['workers_fields_info'] = but.call_list_method('user.fields')
     # список только активных сотрудников (ACTIVE: True)
     result['active_workers_list'] = but.call_list_method('user.search',{
         'filter': {'ACTIVE': True}
     })
     # список полей для подразделения
-    result['department_fields'] = but.call_list_method('department.fields')
+    # result['department_fields'] = but.call_list_method('department.fields')
     # список подразделений
     result['department_list'] = but.call_list_method('department.get')
     return result
@@ -23,7 +24,7 @@ def get_department_names(department_hash, user):
     return [department_hash.get(dep_id).get('NAME') for dep_id in user.get('UF_DEPARTMENT')]
 
 
-def chief_froward_list(department_hash, users_hash, user, cache=None):
+def chief_forward_list(department_hash, users_hash, user):
     """ Рекурсивная функция для иерархического поиска всех начальников - возвращает список начальников """
 
     user_id = safe_int(user['ID'])
@@ -38,7 +39,6 @@ def chief_froward_list(department_hash, users_hash, user, cache=None):
     dept_depths.sort(key=lambda x: x[1], reverse=True)  # отдел с максимальной глубиной первым
     main_dep_id = dept_depths[0][0]
 
-
     # отдельно для главного отдела
     add_chiefs_list(main_dep_id, department_hash, user_id, users_hash, seen_heads, chiefs)
 
@@ -47,6 +47,7 @@ def chief_froward_list(department_hash, users_hash, user, cache=None):
         if dep_id == main_dep_id:
             continue
         add_chiefs_list(dep_id, department_hash, user_id, users_hash, seen_heads, chiefs)
+
     return chiefs
 
 
