@@ -6,7 +6,7 @@ from django.shortcuts import render
 
 from integration_utils.bitrix24.bitrix_user_auth.main_auth import main_auth
 
-from .services import api_workers_info, safe_int
+from .services import api_workers_info, safe_int, add_child_level, assign_levels, get_department_chain_for_user
 
 
 # Create your views here.
@@ -16,67 +16,23 @@ def workers(request):
     api_info = api_workers_info(bitrix_token)
 
     active_workers_list = api_info['active_workers_list']
+    # хеш по id
     users_by_id = {safe_int(u['ID']): u for u in active_workers_list}
 
     department_list = api_info['department_list']
+    # хеш по id
     departments_by_id = {safe_int(d['ID']): d for d in department_list}
 
-    # добавляем children и level для каждого отдела
-    for dep in departments_by_id.values():
-        dep['children'] = []
-        dep['level'] = 0
-
-    # заполняем children
-    for dep_id, dep in departments_by_id.items():
-        parent_id = safe_int(dep.get('PARENT'))
-        if parent_id and parent_id in departments_by_id:
-            # Добавляем как int, не строку!
-            departments_by_id[parent_id]['children'].append(dep_id)
-
-    # рекурсивная функция для уровней
-    def assign_levels(dep_id, level=0):
-        departments_by_id[dep_id]['level'] = level
-        for child_id in departments_by_id[dep_id]['children']:
-            assign_levels(child_id, level + 1)
-
-    # стартуем с корней (у кого нет PARENT)
+    add_child_level(departments_by_id)
     roots = [dep_id for dep_id, dep in departments_by_id.items() if not dep.get('PARENT')]
     for root in roots:
-        assign_levels(root)
+        assign_levels(departments_by_id, root)
 
-    # --- вспомогательные функции ---
-    def get_all_children(dep_id):
-        result = []
-        for child_id in departments_by_id[dep_id]['children']:
-            result.append(child_id)
-            result.extend(get_all_children(child_id))
-        return result
-
-    def get_department_chain_for_user(user_deps):
-        user_deps = [safe_int(d) for d in user_deps if d in departments_by_id]
-        if not user_deps:
-            return []
-        max_level = max(departments_by_id[d]['level'] for d in user_deps)
-        result = set()
-        for level in range(max_level, -1, -1):
-            for dep_id, dep in departments_by_id.items():
-                if dep['level'] == level:
-                    all_children = get_all_children(dep_id)
-                    if dep_id in user_deps or any(c in user_deps for c in all_children):
-                        result.add(dep_id)
-                        parent = dep.get('PARENT')
-                        while parent:
-                            parent = safe_int(parent)
-                            result.add(parent)
-                            parent = departments_by_id.get(parent, {}).get('PARENT')
-        return sorted(result, key=lambda d: departments_by_id[d]['level'], reverse=True)
-
-    # --- основная логика ---
+    # --- Формирование результата ---
     result = {}
-
     for user_id, user in users_by_id.items():
         user_deps = [safe_int(dep_id) for dep_id in user.get('UF_DEPARTMENT', []) if dep_id]
-        dep_chain = get_department_chain_for_user(user_deps)
+        dep_chain = get_department_chain_for_user(departments_by_id, user_deps)
         dep_names = [departments_by_id[d]['NAME'] for d in dep_chain if d in departments_by_id]
 
         boss_list = []
@@ -98,7 +54,6 @@ def workers(request):
         }
 
     return render(request, 'app3_workers/workers.html', locals())
-
 
 
 @main_auth(on_cookies=True)
