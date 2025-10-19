@@ -20,6 +20,7 @@
                 <th>Работник</th>
                 <th>Отделы</th>
                 <th>Начальники</th>
+                <th>Количество исходящий звонков > 1 мин за последние 24 часа</th>
             </tr>
         </thead>
         <tbody>
@@ -44,10 +45,18 @@
                         <em>—</em>
                     {% endif %}
                 </td>
+                <td>
+                    {% if info.CALL_QUANT %}
+                        {{ info.CALL_QUANT }}
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    <div class="telephone-info">
+
+    </div>
     <style>
         span.user-link {
             cursor: pointer;
@@ -58,13 +67,8 @@
     </style>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Проверяем, доступен ли BX24
-            if (typeof BX24 === 'undefined') {
-                console.warn('BX24 API не найден — вы не в iframe Bitrix24.');
-                return;
-            }
 
+        BX24.init(function() {
             document.querySelectorAll('.user-link').forEach(el => {
                 el.addEventListener('click', () => {
                     const id = el.dataset.id;

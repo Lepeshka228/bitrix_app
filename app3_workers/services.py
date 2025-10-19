@@ -1,3 +1,6 @@
+from datetime import datetime, timedelta, timezone
+from itertools import count
+
 from integration_utils.bitrix24.functions import call_list_method, batch_api_call
 
 
@@ -16,6 +19,7 @@ def api_workers_info(but):
     # result['department_fields'] = but.call_list_method('department.fields')
     # список подразделений
     result['department_list'] = but.call_list_method('department.get')
+    result['call_list'] = but.call_list_method('voximplant.statistic.get')
     return result
 
 def safe_int(x):
@@ -78,3 +82,19 @@ def get_department_chain_for_user(departments_by_id, user_deps):
                         result.add(parent)
                         parent = departments_by_id.get(parent, {}).get('PARENT')
     return sorted(result, key=lambda d: departments_by_id[d]['level'], reverse=True)
+
+
+def get_user_call_list(call_list, user_id):
+    """ Возвращает кол-во исходящих звонков длительностью > 1 минуты за последние 24 часа """
+
+    now = datetime.now(timezone.utc)
+    day_ago = now - timedelta(hours=24)
+    cur_call_list = []
+    for call in call_list:
+        call_time = datetime.fromisoformat(call['CALL_START_DATE'].replace('Z', '+00:00'))
+        if int(call['PORTAL_USER_ID']) == user_id \
+                and int(call['CALL_TYPE']) == 1 \
+                and int(call['CALL_DURATION']) > 60 \
+                and call_time > day_ago:
+            cur_call_list.append(call)
+    return len(cur_call_list)
