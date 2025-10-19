@@ -17,26 +17,6 @@ def workers(request):
     bitrix_token = request.bitrix_user_token
     api_info = api_workers_info(bitrix_token)
 
-    #================================
-    # phone_number = '+79999999999'
-    # add_call = bitrix_token.call_api_method('telephony.externalcall.register', {
-    #     'USER_ID': 1,
-    #     'PHONE_NUMBER': phone_number,
-    #     'TYPE': 2
-    # })
-    # end_call = bitrix_token.call_api_method('telephony.externalcall.finish', {
-    #     'CALL_ID': add_call['result']['CALL_ID'],
-    #     'USER_ID': 1,
-    #     'DURATION': 34
-    # })
-    # print(add_call)
-    # print(end_call)
-    # tel_list = bitrix_token.call_api_method('voximplant.statistic.get')['result']
-    # for tel in tel_list:
-    #     if int(tel['PORTAL_USER_ID']) == 1 and int(tel['CALL_TYPE']) == 1 and int(tel['CALL_DURATION']) > 60:
-    #         print(tel)
-    # ================================
-
     active_workers_list = api_info['active_workers_list']
     # хеш по id
     users_by_id = {safe_int(u['ID']): u for u in active_workers_list}
@@ -81,11 +61,3 @@ def workers(request):
         }
 
     return render(request, 'app3_workers/workers.html', {'result': result})
-
-
-@main_auth(on_cookies=True)
-def reload_index(request):
-    ''' Главная страница для возвращения по кнопке "На главную". Загружается по куки '''
-
-    user_name = f'{request.bitrix_user.first_name} {request.bitrix_user.last_name}'
-    return render(request, 'main/index.html', locals())

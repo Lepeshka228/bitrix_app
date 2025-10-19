@@ -10,3 +10,11 @@ def index(request):
 
     user_name = f'{request.bitrix_user.first_name} {request.bitrix_user.last_name}'
     return render(request, 'main/index.html', locals())
+
+
+@main_auth(on_cookies=True)
+def reload_index(request):
+    ''' Главная страница для возвращения по кнопке "На главную". Загружается по куки '''
+
+    user_name = f'{request.bitrix_user.first_name} {request.bitrix_user.last_name}'
+    return render(request, 'main/index.html', locals())

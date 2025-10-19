@@ -23,5 +23,6 @@ urlpatterns = [
     path('', include('main.urls')),
     path('deals/', include('app1_deals.urls', namespace='deals')),
     path('goods/', include('app2_goods.urls', namespace='goods')),
-    path('workers/', include('app3_workers.urls', namespace='workers'))
+    path('workers/', include('app3_workers.urls', namespace='workers')),
+    path('map/', include('app4_map.urls', namespace='map'))
 ]

@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     'main',
     'app1_deals',
     'app2_goods',
-    'app3_workers'
+    'app3_workers',
+    'app4_map'
 ]
 
 ROOT_URLCONF = 'urls'

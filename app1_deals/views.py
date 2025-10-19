@@ -64,11 +64,3 @@ def add_deal(request):
     form.fields['UF_CRM_PRIORITY'].choices = choices[3]
 
     return render(request, 'app1_deals/add_deal.html', {'form': form})
-
-
-@main_auth(on_cookies=True)
-def reload_index(request):
-    ''' Главная страница для возвращения по кнопке "На главную". Загружается по куки '''
-
-    user_name = f'{request.bitrix_user.first_name} {request.bitrix_user.last_name}'
-    return render(request, 'main/index.html', locals())

@@ -103,12 +103,3 @@ def goods_public(request, signed_data):
 
     return render(request, 'app2_goods/goods_public.html', {'good': good,
                                                             'good_img': good_img})
-
-
-
-@main_auth(on_cookies=True)
-def reload_index(request):
-    ''' Главная страница для возвращения по кнопке "На главную". Загружается по куки '''
-
-    user_name = f'{request.bitrix_user.first_name} {request.bitrix_user.last_name}'
-    return render(request, 'main/index.html', locals())
