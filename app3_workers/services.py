@@ -65,23 +65,18 @@ def get_all_children(departments_by_id, dep_id):
 def get_department_chain_for_user(departments_by_id, user_deps):
     """ Формирует цепочку отделов для пользователя """
 
-    user_deps = [safe_int(d) for d in user_deps if d in departments_by_id]
-    if not user_deps:
-        return []
-    max_level = max(departments_by_id[d]['level'] for d in user_deps)
-    result = set()
-    for level in range(max_level, -1, -1):
-        for dep_id, dep in departments_by_id.items():
-            if dep['level'] == level:
-                all_children = get_all_children(departments_by_id, dep_id)
-                if dep_id in user_deps or any(c in user_deps for c in all_children):
-                    result.add(dep_id)
-                    parent = dep.get('PARENT')
-                    while parent:
-                        parent = safe_int(parent)
-                        result.add(parent)
-                        parent = departments_by_id.get(parent, {}).get('PARENT')
-    return sorted(result, key=lambda d: departments_by_id[d]['level'], reverse=True)
+    user_deps = [safe_int(d) for d in user_deps]
+    res = set()
+    for d in user_deps:
+        if d not in departments_by_id:
+            continue
+        cur = d
+        while cur:
+            res.add(cur)
+            parent = departments_by_id[cur].get('PARENT')
+            cur = safe_int(parent)
+    return sorted([r for r in res if r in departments_by_id],
+                  key=lambda x: departments_by_id[x]['level'], reverse=True)
 
 
 def get_user_call_list(call_list, user_id):
@@ -91,7 +86,7 @@ def get_user_call_list(call_list, user_id):
     day_ago = now - timedelta(hours=24)
     cur_call_list = []
     for call in call_list:
-        call_time = datetime.fromisoformat(call['CALL_START_DATE'].replace('Z', '+00:00'))
+        call_time = datetime.fromisoformat(call['CALL_START_DATE'])
         if int(call['PORTAL_USER_ID']) == user_id \
                 and int(call['CALL_TYPE']) == 1 \
                 and int(call['CALL_DURATION']) > 60 \

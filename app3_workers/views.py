@@ -39,7 +39,7 @@ def workers(request):
         cur_call_list_quant = get_user_call_list(call_list, user_id)
         user_deps = [safe_int(dep_id) for dep_id in user.get('UF_DEPARTMENT', []) if dep_id]
         dep_chain = get_department_chain_for_user(departments_by_id, user_deps)
-        dep_names = [departments_by_id[d]['NAME'] for d in dep_chain if d in departments_by_id]
+        dep_names = [departments_by_id[d]['NAME'] for d in user_deps if d in departments_by_id]
 
         boss_list = []
         for dep_id in dep_chain:
