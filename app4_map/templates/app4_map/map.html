@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="referrer" content="origin-when-cross-origin">
     <title>Карта в Django</title>
-    <script src="//api.bitrix24.com/api/v1/"></script>
     <script src="https://api-maps.yandex.ru/v3/?apikey=fcff3592-2cc9-442e-ba8d-9fb3386b4d6f&lang=ru_RU"></script>
 </head>
 <body>
@@ -22,38 +21,51 @@
     {% endfor %}
     </ul>
 
-    <div id="map" style="width: 800px; height: 600px; border: 1px solid black;"></div>
+    <div id="map" style="width: 90%; height: 600px; border: 1px solid black;"></div>
+
     <script>
-        initMap();
-
         async function initMap() {
-            // Промис `ymaps3.ready` будет зарезолвлен, когда загрузятся все компоненты основного модуля API
+            const mapData = JSON.parse('{{ result_json|escapejs }}');
+
             await ymaps3.ready;
+            const {YMap, YMapDefaultSchemeLayer, YMapMarker, YMapDefaultFeaturesLayer} = ymaps3;
 
-            const {YMap, YMapDefaultSchemeLayer} = ymaps3;
-
-            // Иницилиазируем карту
             const map = new YMap(
-                // Передаём ссылку на HTMLElement контейнера
                 document.getElementById('map'),
-
-                // Передаём параметры инициализации карты
-                {
-                    location: {
-                        // Координаты центра карты
-                        center: [37.588144, 55.733842],
-
-                        // Уровень масштабирования
-                        zoom: 10
-                    }
-                }
+                { location: { center: [37.6173, 55.7558], zoom: 10 } }
             );
 
-            // Добавляем слой для отображения схематической карты
             map.addChild(new YMapDefaultSchemeLayer());
+            map.addChild(new YMapDefaultFeaturesLayer());
+
+            for (const company of Object.values(mapData)) {
+                if (company.address) {
+                    const response = await fetch(
+                        `https://geocode-maps.yandex.ru/1.x/?format=json&apikey=fcff3592-2cc9-442e-ba8d-9fb3386b4d6f&geocode=${encodeURIComponent(company.address)}`
+                    );
+                    const data = await response.json();
+                    const found = data.response.GeoObjectCollection.featureMember;
+
+                    if (found && found.length > 0) {
+                        const pos = found[0].GeoObject.Point.pos;
+                        const [lon, lat] = pos.split(' ').map(Number);
+
+                        const markerElement = document.createElement('div');
+                        markerElement.innerHTML = '📍';
+                        markerElement.style.fontSize = '40px';
+                        markerElement.style.transform = 'translate(-50%, -100%)';
+                        markerElement.title = company.name;
+
+                        const marker = new YMapMarker({ coordinates: [lon, lat] }, markerElement);
+                        map.addChild(marker);
+                    }
+                }
+            }
         }
 
+        initMap();
     </script>
+
 
 </body>
 </html>
