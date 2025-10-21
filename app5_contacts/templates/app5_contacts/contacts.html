@@ -31,5 +31,6 @@
         {{ form.as_p }}
         <button type="submit">Загрузить</button>
     </form>
+    <a href="{% url 'contacts:export_contacts' %}" class="btn btn-primary">Экспортировать контакты (в csv файл)</a>
 </body>
 </html>

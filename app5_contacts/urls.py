@@ -5,4 +5,5 @@ app_name = 'contacts'
 
 urlpatterns = [
     path('', views.contacts, name='contacts'),
+    path('export_contacts/', views.export_contacts, name='export_contacts')
 ]

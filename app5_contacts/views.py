@@ -4,6 +4,7 @@ from crypt import methods
 
 from django.contrib import messages
 from django.db.models.expressions import result
+from django.http import HttpResponse
 from django.shortcuts import render
 
 from integration_utils.bitrix24.bitrix_user_auth.main_auth import main_auth
@@ -105,3 +106,41 @@ def contacts(request):
             return render(request, 'app5_contacts/contacts.html', {'form': form, 'errors': errors})
 
     return render(request, 'app5_contacts/contacts.html', {'form': form})
+
+@main_auth(on_cookies=True)
+def export_contacts(request):
+    but = request.bitrix_user_token
+
+    # получаю все контакты через call_list_method
+    contacts = but.call_list_method('crm.contact.list', {
+        'select': ['ID', 'NAME', 'LAST_NAME', 'PHONE', 'EMAIL', 'COMPANY_ID']
+    })
+
+    # получаю компании - для названия компании по id
+    company_list = but.call_list_method('crm.company.list', {'select': ['ID', 'TITLE']})
+    companies = {comp['ID']: comp['TITLE'] for comp in company_list}
+
+    # создаю httpresponse с нужным типом csv
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="contacts.csv"'
+
+    writer = csv.writer(response)
+    # Заголовки
+    writer.writerow(['имя', 'фамилия', 'телефон', 'email', 'компания'])
+
+    # формирую строки
+    for contact in contacts:
+        # contact_id = contact.get('ID', '')
+        name = contact.get('NAME', '')
+        last_name = contact.get('LAST_NAME', '')
+
+        # PHONE и EMAIL — списки словарей, собираю строки через запятую
+        phones = ', '.join([p.get('VALUE', '') for p in contact.get('PHONE', [])])
+        emails = ', '.join([e.get('VALUE', '') for e in contact.get('EMAIL', [])])
+
+        # получаю название компании по её id
+        company_id = contact.get('COMPANY_ID', '')
+        company_name = companies.get(company_id)
+        writer.writerow([name, last_name, phones, emails, company_name])
+
+    return response
