@@ -18,19 +18,12 @@
         {% endfor %}
         </ul>
     {% endif %}
-    {% if errors %}
-        <ul>
-        {% for error in errors %}
-            <li>{{ error }}</li>
-        {% endfor %}
-        </ul>
-    {% endif %}
 
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Загрузить</button>
     </form>
-    <a href="{% url 'contacts:export_contacts' %}" class="btn btn-primary">Экспортировать контакты (в csv файл)</a>
+    <a href="{% url 'contacts:export_contacts' %}" class="btn btn-primary">Экспортировать контакты (в файл)</a>
 </body>
 </html>
