@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Яндекс карта с компаниями</title>
+    <script src="https://api-maps.yandex.ru/v3/?apikey=fcff3592-2cc9-442e-ba8d-9fb3386b4d6f&lang=ru_RU"></script>
+</head>
+<body>
+    <div id="map" style="width: 100%; height: 600px; border: 1px solid black;"></div>
+
+    <script>
+        async function initMap() {
+            // Получаем данные из URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const dataParam = urlParams.get('data');
+            const mapData = dataParam ? JSON.parse(decodeURIComponent(dataParam)) : {};
+
+            await ymaps3.ready;
+            const {YMap, YMapDefaultSchemeLayer, YMapMarker, YMapDefaultFeaturesLayer} = ymaps3;
+
+            const map = new YMap(
+                document.getElementById('map'),
+                { location: { center: [37.6173, 55.7558], zoom: 10 } }
+            );
+
+            map.addChild(new YMapDefaultSchemeLayer());
+            map.addChild(new YMapDefaultFeaturesLayer());
+
+            // Геокодируем адреса и добавляем маркеры
+            for (const company of Object.values(mapData)) {
+                if (company.address) {
+                    const response = await fetch(`https://geocode-maps.yandex.ru/1.x/?format=json&apikey=fcff3592-2cc9-442e-ba8d-9fb3386b4d6f&geocode=${encodeURIComponent(company.address)}`);
+                    const data = await response.json();
+                    const found = data.response.GeoObjectCollection.featureMember;
+
+                    if (found && found.length > 0) {
+                        const pos = found[0].GeoObject.Point.pos;
+                        const [lon, lat] = pos.split(' ').map(Number);
+
+                        const markerElement = document.createElement('div');
+                        markerElement.innerHTML = '📍';
+                        markerElement.style.fontSize = '40px';
+                        markerElement.style.transform = 'translate(-50%, -100%)';
+                        markerElement.title = company.name;
+
+                        const marker = new YMapMarker({ coordinates: [lon, lat] }, markerElement);
+                        map.addChild(marker);
+                    }
+                }
+            }
+        }
+
+        initMap();
+    </script>
+</body>
+</html>

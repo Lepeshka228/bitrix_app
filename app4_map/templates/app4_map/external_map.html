@@ -1,27 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="referrer" content="origin-when-cross-origin">
-    <title>Карта в Django</title>
-    <script src="//api.bitrix24.com/api/v1/"></script>
+    <meta charset="utf-8">
+    <title>Яндекс карта</title>
     <script src="https://api-maps.yandex.ru/v3/?apikey=fcff3592-2cc9-442e-ba8d-9fb3386b4d6f&lang=ru_RU"></script>
 </head>
 <body>
-    <div>
-        <nav><a href="{% url 'main:reload_index' %}">На главную</a></nav>
-        <hr>
-    </div>
-
-    <h2>Карта компаний</h2>
-
-    Перейдите по ссылке: <a href="{{ external_url }}">на внешний сайт</a>
-    <ul>
-    {% for company_id, company in result.items %}
-        <li>{{ company.name }} по адресу {{ company.address }}</li>
-    {% endfor %}
-    </ul>
-
+    <h1>Карта</h1>
     <div id="map" style="width: 800px; height: 600px; border: 1px solid black;"></div>
     <script>
         initMap();
@@ -54,6 +39,5 @@
         }
 
     </script>
-
 </body>
 </html>
