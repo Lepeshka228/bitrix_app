@@ -11,5 +11,18 @@
     </div>
     <h2>Импорт и экспорт контактов</h2>
     <p>Загрузите свой файл с контактами и они будут добавлены или получите файл с имеющимися контактами</p>
+    {% if messages %}
+        <ul>
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Загрузить</button>
+    </form>
 </body>
 </html>
